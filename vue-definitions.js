@@ -601,6 +601,35 @@ let app = new Vue({
       let countries = data.map(e => e["Country/Region"]);
       countries = this.removeRepeats(countries);
 
+      let grouped = [];
+      for (let country of countries){
+        let countryData = data.filter(e => e["Country/Region"] == country);
+        const row = {region: country}
+
+        if (!Object.keys(contrySizes).includes(country)) {
+          console.log('country didn\'t match: ', country);
+          continue;
+        }
+        let contrySize = contrySizes[country];
+
+        for (let date of dates) {
+          let sum = countryData.map(e => parseInt(e[date]) || 0).reduce((a,b) => a+b);
+          row[date] = sum;
+           arr.push(this.perCapita ? sum * 1000000 / contrySize: sum);
+
+        }
+        grouped.push(row);
+      }
+      return grouped;
+    },
+
+    filterByCountry(data, dates, selectedRegion) {
+      return data.filter(e => e["Country/Region"] == selectedRegion)
+          .map(e => ({...e, region: e["Province/State"]}));
+    },
+
+    processData(data, selectedRegion, updateSelectedCountries) {
+
       let dates = Object.keys(data[0]).slice(4);
       this.dates = dates;
 
